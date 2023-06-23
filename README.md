@@ -350,6 +350,12 @@ exit
 umount -R /mnt
 reboot
 ```
+After reboot GRUB should ask for a password like this:
+
+![Alt text](/images/Welcome_to_GRUB2.JPG?raw=true "GRUB ask pass")
+
+
+
 
 ## Refs:
 This guide is a compilation and adaptation of data from many sources, including the following:
@@ -380,3 +386,4 @@ chmod +x /tmp/install.sh
 /tmp/install.sh
 reboot
 ```
+![Alt text](/images/GRUB_Splash.PNG?raw=true "GRUB fallout theme")
