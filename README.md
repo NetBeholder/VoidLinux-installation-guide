@@ -38,7 +38,7 @@ Some steps require more investigation, testing and optimization:
 - swapfile: 4G - /swap/swapfile
 ## Go!
 ## Table of contents
-0. [Introduction] 
+0. [Introduction](#introduction)
     1. [Current status](#current-status)
     2. [Features](#features)
     3. [Notes](#notes)
@@ -48,8 +48,8 @@ Some steps require more investigation, testing and optimization:
         1. [Logging in (locally)](#logging-in-(locally))
         2. [Connecting to the network (wi-fi)](#connecting-to-the-network-(wi-fi))
         3. [Establishing SSH-connection](#establishing-ssh-connection)
-	2. [BIOS or UEFI?](#bios-or-uefi)
-    3. [Creating file systems and swap](#creating-file-systems-and-swap)
+	4. [BIOS or UEFI?](#bios-or-uefi)
+    2. [Creating file systems and swap](#creating-file-systems-and-swap)
     	1. [Set environment variables](#set-environment-variables)
         2. [Partitioninig disks](#partitioninig-disks)
         3. [Partitions encryption](#partitions-encryption)
@@ -78,11 +78,11 @@ Some steps require more investigation, testing and optimization:
 	4. [Finishing installation](#finishing-installation)
 	   	1. [Installing bootloader](#installing-bootloader)
     		2. [Autostart services](#autostart-services)
-		3. [Initramfs]
-3. [Post-installation actions]
-4. [Refs]
-5. [See also]
-6. [Bonus №1]
+		3. [Initramfs](#initramfs)
+3. [Post-installation](#post-installation)
+4. [Refs](#refs)
+5. [See also](#see-also)
+6. [Bonus №1](bonus-1)
 ## Initial settings
 ## Live ISO
 ### Logging in (locally)
@@ -505,6 +505,7 @@ After reboot GRUB should ask for a password like this:
 
 ![Alt text](/images/Welcome_to_GRUB2.JPG?raw=true "GRUB ask pass")
 
+## Post-installation
 ## Refs:
 This guide is a compilation and adaptation of data from many sources, including the following:
 
