@@ -49,36 +49,36 @@ Some steps require more investigation, testing and optimization:
         2. [Connecting to the network (wi-fi)](#connecting-to-the-network-(wi-fi))
         3. [Establishing SSH-connection](#establishing-ssh-connection)
 	2. [BIOS or UEFI?](#bios-or-uefi)
-    3. [Creating file systems and swap]
-    	1. [Set environment variables]
-        2. [Partitioninig disks]
-        3. [Partitions encryption]
-           1. [LUKS-encrypted boot]
-           2. [LUKS-encrypted root]
-           3. [Open encrypted partitions]
-	4. [Configuring LVM]
-	5. [Formatting partitions]
-	6. [Mounting partitions]
-	7. [Making swapfile]		
-2. [Installing the system]
-   	1. [Base installation (XBPS Method)]
-    2. [Chroot]
-	3. [Basic configuration]
-		1. [G(root) password and shell] 
-		2. [Hostname]
-		3. [Console fonts]
-		4. [Locales]
-		5. [fstab]
-		6. [GRUB]
-		7. [Encryption settings]
-			1. [GRUB]
-			2. [LUKS keys]
-			3. [crypttab]
-			4. [dracut]
-	4. [Finishing installation]
-	   	1. [Install bootloader]
-    	2. [Autostart services]
-		3. [Regenerating configurations]
+    3. [Creating file systems and swap](#creating-file-systems-and-swap)
+    	1. [Set environment variables](#set-environment-variables)
+        2. [Partitioninig disks](#partitioninig-disks)
+        3. [Partitions encryption](#partitions-encryption)
+           1. [LUKS-encrypted boot](#luks-encrypted-boot)
+           2. [LUKS-encrypted root](#luks-encrypted-root)
+           3. [Open encrypted partitions](#open-encrypted-partitions)
+	4. [Configuring LVM](#configuring-lvm)
+	5. [Formatting partitions](#formatting-partitions)
+	6. [Mounting partitions](#mounting-partitions)
+	7. [Making swapfile](#making-swapfile)		
+2. [Installing the system](#installing-the-system)
+   	1. [Base installation (XBPS Method)](#base-installation-xbps-method)
+    	2. [Chroot](#chroot)
+	3. [Basic configuration](#basic-configuration)
+		1. [G(root) password and shell](#groot-password-and-shell)
+		2. [Hostname](#hostname)
+		3. [Console fonts](#console-fonts)
+		4. [System locales](#system-locales)
+		5. [fstab](#fstab)
+		6. [LVM.conf](#lvmconf)
+		7. [Encryption settings](#encryption-settings)
+			1. [GRUB](#grub)
+			2. [LUKS keys](#luks-keyfile)
+			3. [crypttab](#crypttab)
+			4. [dracut](#dracut)
+	4. [Finishing installation](#finishing-installation)
+	   	1. [Installing bootloader](#installing-bootloader)
+    		2. [Autostart services](#autostart-services)
+		3. [Initramfs]
 3. [Post-installation actions]
 4. [Refs]
 5. [See also]
@@ -381,7 +381,7 @@ xbps-install -Suy terminus-font
 echo KEYMAP=ru >> /etc/rc.conf # '=us' '=de' and so on
 echo FONT=ter-c16n >> /etc/rc.conf
 ```
-#### Locales
+#### System locales
 Set system locales - /etc/default/libc-locales
 ```bash
 sed -i 's/#en_US.UTF-8/en_US.UTF-8/g' /etc/default/libc-locales
@@ -480,7 +480,7 @@ dracut --force --hostonly --kver 6.1.34_1
 ```
 
 #### Finishing installation
-##### Install bootloader
+##### Installing bootloader
 ```console
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=void --boot-directory=/boot  --recheck
 ```
@@ -494,7 +494,7 @@ Set OpenSSH Server to autostart and accept connections for root user (unsecure!)
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 ln -s /etc/sv/sshd /var/service
 ```
-##### Regenerating configurations
+##### Initramfs
 ```console
 (chroot) # xbps-reconfigure -fa
 (chroot) # exit
