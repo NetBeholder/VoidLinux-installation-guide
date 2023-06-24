@@ -78,7 +78,7 @@ Some steps require more investigation, testing and optimization:
 	4. [Finishing installation](#finishing-installation)
 	   	1. [Installing bootloader](#installing-bootloader)
     		2. [Autostart services](#autostart-services)
-		3. [Initramfs](#initramfs)
+    	 	3. [Initramfs](#initramfs)
 3. [Post-installation](#post-installation)
 4. [Refs](#refs)
 5. [See also](#see-also)
