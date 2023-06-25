@@ -80,13 +80,14 @@ Some steps require more investigation, testing and optimization:
     	2. [Autostart services](#autostart-services)
     	3. [Initramfs](#initramfs)
 3. [Further steps](#further-steps)
-	1. [System-wide settings]
+	1. [System-wide settings](#system-wide-settings)
  		1. [Network configuration (NetworkManager)](#network-configuration-networkmanager)
-   		2. [Firmwares](#firmwares)
+   		2. [Firmware](#firmware)
   		3. [Date and time](#date-and-time)
     	4. [Syslog (socklog)](#syslog-socklog)
+     	5. [Seat management](#seat-management)
      2. [User settings](#user-settings)
-     	1. [New normal user and doas]
+     	1. [New normal user and doas](#new-normal-user-and-doas)
 5. [Refs](#refs)
 6. [See also](#see-also)
 7. [Bonus №1](bonus-1)
@@ -512,17 +513,6 @@ After reboot GRUB should ask for a password like this:
 
 ![Alt text](/images/Welcome_to_GRUB2.JPG?raw=true "GRUB ask pass")
 
-
-3. [Further steps](#further-steps)
-	1. [System-wide settings]
- 		1. [Network configuration (NetworkManager)](#network-configuration-networkmanager)
-   		2. [Firmwares](#firmwares)
-  		3. [Date and time](#date-and-time)
-    	4. [Syslog (socklog)](#syslog-socklog)
-     2. [User settings](#user-settings)
-     	1. [New normal user]
-
-
 ## Further steps
 ### System-wide settings
 #### Network configuration (NetworkManager)
@@ -540,6 +530,18 @@ plugins=keyfile
 #[device]
 #wifi.backend=iwd
 EOF
+
+# in this way, IWD can be used in conjunction with NetworkManager for Wi-Fi management.
+xbps-install -Suy iwd
+cat <<EOF > /etc/iwd/main.conf
+[General]
+UseDefaultInterface=true
+EOF
+# Uncomment device section in the NetworkManager.conf
+sed -i 's/#\[device\]/\[device\]/g' /etc/NetworkManager/NetworkManager.conf
+sed -i 's/#wifi.backend=iwd/wifi.backend=iwd/g' /etc/NetworkManager/NetworkManager.conf
+ln -s /etc/sv/iwd/ /var/service/
+sv restart NetworkManager
 
 #Exclude dhcpcd daemon from autostart. It can be removed.
 rm /var/service/dhcpcd
@@ -581,13 +583,18 @@ ln -s /etc/sv/nanoklogd/ /var/service
 #The ability to read logs is limited to root and users who are part of the socklog group.
 #####
 ```
+#### Seat management
+```console
+xbps-install -Suy elogind dbus-elogind dbus-elogind-libs dbus-elogind-x11
+ln -s /etc/sv/elogind/ /var/service
+```
 ### User settings
-#### New normal user
-Let's create a new user with a temporary password and usual (Document, Download and so on) directories in the user directory. Doas can be used as a simple replacement for `sudo` on a single user system.
+#### New normal user and doas
+Let's create a new user with a temporary password and usual (Documents, Downloads and so on) directories in the user home directory. Doas can be used as a simple replacement for `sudo` on a single user system.
 
 ```bash
 (login as root)
-#Set username and temp password
+#Set username and intermediate password
 UserName=JohnyUtah
 UserPassword="P@ssw0rd"
 
