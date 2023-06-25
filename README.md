@@ -79,10 +79,17 @@ Some steps require more investigation, testing and optimization:
  		1. [Installing bootloader](#installing-bootloader)
     	2. [Autostart services](#autostart-services)
     	3. [Initramfs](#initramfs)
-3. [Post-installation](#post-installation)
-4. [Refs](#refs)
-5. [See also](#see-also)
-6. [Bonus №1](bonus-1)
+3. [Further steps](#further-steps)
+	1. [System-wide settings]
+ 		1. [Network configuration (NetworkManager)](#network-configuration-networkmanager)
+   		2. [Firmwares](#firmwares)
+  		3. [Date and time](#date-and-time)
+    	4. [Syslog (socklog)](#syslog-socklog)
+     2. [User settings](#user-settings)
+     	1. [New normal user and doas]
+5. [Refs](#refs)
+6. [See also](#see-also)
+7. [Bonus №1](bonus-1)
 ## Initial settings
 ## Live ISO
 ### Logging in (locally)
@@ -505,7 +512,107 @@ After reboot GRUB should ask for a password like this:
 
 ![Alt text](/images/Welcome_to_GRUB2.JPG?raw=true "GRUB ask pass")
 
-## Post-installation
+
+3. [Further steps](#further-steps)
+	1. [System-wide settings]
+ 		1. [Network configuration (NetworkManager)](#network-configuration-networkmanager)
+   		2. [Firmwares](#firmwares)
+  		3. [Date and time](#date-and-time)
+    	4. [Syslog (socklog)](#syslog-socklog)
+     2. [User settings](#user-settings)
+     	1. [New normal user]
+
+
+## Further steps
+### System-wide settings
+#### Network configuration (NetworkManager)
+The first thing to do on a freshly installed system is to set up the network. I prefer NetworkManager. Run `nmtui` for user-friendly configuring Linux network settings in pseudographic manner.
+Also NetworkManager may back end some other network tools like iwd
+```bash
+(login as root)
+ln -s /etc/sv/NetworkManager/ /var/service
+ln -s /etc/sv/dbus/ /var/service
+
+cat <<EOF > /etc/NetworkManager/NetworkManager.conf
+[main]
+plugins=keyfile
+
+#[device]
+#wifi.backend=iwd
+EOF
+
+#Exclude dhcpcd daemon from autostart. It can be removed.
+rm /var/service/dhcpcd
+```
+#### Firmware
+```console
+(login as root)
+xbps-install -Suy void-repo-nonfree
+xbps-install -Suy linux-firmware
+```
+#### Date and time
+```console
+(login as root)
+
+# Timezones available for selection are located in /usr/share/zoneinfo/*/*
+ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+
+#Set hardware clock to localtime (Windows-style) from #HARDWARECLOCK="UTC"
+sed -i 's/#HARDWARECLOCK="UTC"/HARDWARECLOCK="localtime"/g' /etc/rc.conf
+
+#NTP daemon
+xbps-install -Suy chrony
+ln -s /etc/sv/ntpd/ /var/service/
+
+#Update the Hardware clock:
+hwclock --systohc
+```
+#### Syslog (socklog)
+```console
+(login as root)
+#Install socklogd
+xbps-install -Suy socklog-void
+ln -s /etc/sv/socklog-unix/ /var/service
+ln -s /etc/sv/nanoklogd/ /var/service
+
+#####
+#The logs are saved in sub-directories of /var/log/socklog/, and svlogtail can be used to access them conveniently.
+#
+#The ability to read logs is limited to root and users who are part of the socklog group.
+#####
+```
+### User settings
+#### New normal user
+Let's create a new user with a temporary password and usual (Document, Download and so on) directories in the user directory. Doas can be used as a simple replacement for `sudo` on a single user system.
+
+```bash
+(login as root)
+#Set username and temp password
+UserName=JohnyUtah
+UserPassword="P@ssw0rd"
+
+xbps-install -Suy xdg-utils xdg-user-dirs opendoas
+useradd -s /bin/bash -m -G wheel,users,video,audio,lp,storage,scanner,input,socklog $UserName -p $UserPassword --badnames
+#create xdg compliant dirs in ~
+sudo -i -u $UserName xdg-user-dirs-update
+
+#simple doas.conf. run `doas cmd` for privilege escalaction instead of sudo
+cat <<EOF > /etc/doas.conf
+permit persist root as root
+permit persist $UserName as root
+permit setenv { XAUTHORITY LANG LC_ALL } root 
+permit setenv { XAUTHORITY LANG LC_ALL } $UserName
+permit nopass $UserName as root cmd xbps-install
+permit nopass $UserName as root cmd updatedb
+permit nopass $UserName as root cmd nano
+permit nopass $UserName as root cmd ls
+permit nopass $UserName as root cmd cp
+EOF
+
+echo "Set password for new user:"
+passwd $UserName
+```
+
 ## Refs:
 This guide is a compilation and adaptation of data from many sources, including the following:
 
