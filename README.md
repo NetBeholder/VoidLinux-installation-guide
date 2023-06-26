@@ -163,7 +163,7 @@ cfdisk "${DEV}"
   select label type: gpt
   Free space
   [NEW]
-  Partition size: 350M #size safely can be 100M+; i prefer 350M personnaly;
+  Partition size: 350M  #ESP/efi partition size can be safely set to 100M+. I prefer 200-350M.
   Type: EFI System
   Free space
   [New]
