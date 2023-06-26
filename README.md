@@ -330,7 +330,7 @@ chmod 600 /mnt/swap/swapfile
 dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=4096 #4G swapfile
 #dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=8192 #8G swapfile
 #dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=16384 #16G swapfile
-mkswap /mnt/swap/swapfile
+mkswap -L swapfile /mnt/swap/swapfile
 swapon /mnt/swap/swapfile
 ```
 ## Installing the system
@@ -338,14 +338,7 @@ swapon /mnt/swap/swapfile
 ```bash
 REPO=https://alpha.de.repo.voidlinux.org/current
 ARCH=x86_64
-XBPS_ARCH=$ARCH xbps-install -S -r /mnt -R "$REPO" base-system btrfs-progs xfsprogs cryptsetup grub-x86_64-efi lvm2 nano
-  Do you want to import this public key? [Y/n] y
-  
-  Size to download:              342MB
-  Size required on disk:         869MB
-  Space available on disk:        14GB
-  
-  Do you want to continue? [Y/n] y
+echo y | XBPS_ARCH=$ARCH xbps-install -Sy -r /mnt -R "$REPO" base-system btrfs-progs xfsprogs cryptsetup grub-x86_64-efi lvm2 nano
 ```
 ### Chroot
 Copy the DNS configuration into the new root so that XBPS can still download new packages inside the chroot:
@@ -441,7 +434,12 @@ GRUB_GFXMODE=1920x1080x32
 EOF
 
 export LUKS_UUID=$(blkid -s UUID -o value /dev/mapper/"${DM}3_crypt")
-sed -i "/GRUB_CMDLINE_LINUX_DEFAULT=/s/\"$/ rd.auto=1 cryptdevice=UUID=$LUKS_UUID:lvm:allow-discards&/" /etc/default/grub
+export SWAPFILE_UUID=`findmnt -no UUID -T /swap/swapfile`
+export SWAPFILE_OFFSET=`filefrag -v /swap/swapfile | awk '$1=="0:" {print substr($4, 1, length($4)-2)}'`
+
+sed -i "/GRUB_CMDLINE_LINUX_DEFAULT=/s/\"$/ rd.auto=1 cryptdevice=UUID=$LUKS_UUID:lvm:allow-discards resume=UUID=$SWAPFILE_UUID resume_offset=$SWAPFILE_OFFSET&/" /etc/default/grub
+
+#sed -i "/GRUB_CMDLINE_LINUX_DEFAULT=/s/\"$/ rd.auto=1 cryptdevice=UUID=$LUKS_UUID:lvm:allow-discards&/" /etc/default/grub
 ```
 
 ##### LUKS Keyfile
@@ -478,13 +476,8 @@ EOF
 echo 'add_dracutmodules+=" crypt lvm resume "' >> /etc/dracut.conf
 echo 'tmpdir=/tmp' >> /etc/dracut.conf
 
-dracut --force --hostonly --kver 6.1.31_1
-  dracut: Cannot find module directory /lib/modules/6.1.31_1/
-  dracut: and --no-kernel was not specified
-#OK. Check current version:
-  (chroot) # ls /lib/modules/
-6.1.34_1
-dracut --force --hostonly --kver 6.1.34_1
+export DracutKver=`ls /lib/modules`
+dracut --force --hostonly --kver $DracutKver
 ```
 
 #### Finishing installation
