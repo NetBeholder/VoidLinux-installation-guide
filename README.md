@@ -252,7 +252,10 @@ ls /dev/mapper/
 ```
 
 ### Configuring LVM
-Configuring LVM layer on top of LUKSv2; it adds some complexity but i use VOID inside VM too.
+Configuring LVM layer on top of LUKSv2.
+As arch wiki says: achieves partitioning flexibility by using LVM inside a single LUKS encrypted partition (Although I only use one partition inside the container - / ).
+https://wiki.archlinux.org/title/dm-crypt/Encrypting_an_entire_system#LVM_on_LUKS
+
 ```bash
 pvcreate /dev/mapper/${DM}3_crypt
   #sata device:
