@@ -495,12 +495,14 @@ grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=void 
 ##### Autostart services
 Set DHCP client to autostart to get IP address from network after reboot
 ```console
-ln -s /etc/sv/dhcpcd /var/service
+
+ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default
+
 ```
 Set OpenSSH Server to autostart and accept connections for root user (unsecure!)
 ```console
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-ln -s /etc/sv/sshd /var/service
+ln -s /etc/sv/sshd /etc/runit/runsvdir/default
 ```
 ##### Initramfs
 ```console
@@ -520,6 +522,7 @@ The first thing to do on a freshly installed system is to set up the network. I 
 Also NetworkManager may back end some other network tools like iwd
 ```bash
 (login as root)
+xbps-install -Suy NetworkManager
 ln -s /etc/sv/NetworkManager/ /var/service
 ln -s /etc/sv/dbus/ /var/service
 
